@@ -38,8 +38,7 @@ const dispatch = self => {
   const ctSnapshot = self.changesTree;
   self.changesTree = {};
   self.dispatched = false;
-  // self[callbackQueue].add(() => self[handlersTree].actOnChanges(ctSnapshot));
-  self[handlersTree].actOnChanges(ctSnapshot)
+  self[handlersTree].actOnChanges(ctSnapshot);
 }
 
 

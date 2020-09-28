@@ -1,6 +1,6 @@
 import JsonState from "./JsonState/index.js"
 
-const erty = new JsonState(JSON.stringify({
+window.erty = new JsonState(JSON.stringify({
   a: 1,
   b: {c: "fuck you"},
   d: "erty",

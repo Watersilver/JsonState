@@ -150,26 +150,13 @@ class JsonState extends JsonStateNode {
     this.hmDebug = () => {
       const hm = this[targetSym][listenersSym];
 
-      const h1 = () => console.log("h1");
+      // const h1 = () => console.log("h1");
 
-      hm.add("a.b", h1);
+      hm.add("a", () => console.log("a"));
 
-      hm.add("c.d", h1);
+      hm.add("b", () => console.log("b"));
 
-      hm.add("e.f.g", h1);
-
-      hm.add("e.f.h", h1);
-
-      hm.add("c.i", h1);
-
-      hm.add("c", h1);
-
-      hm.add("c", () => console.log("other"));
-
-
-      hm.cleanPath("a.b");
-
-      hm.removeHandler(h1);
+      hm.add("f.g.0", () => console.log("wat"));
 
       console.log("hm is", hm);
     }

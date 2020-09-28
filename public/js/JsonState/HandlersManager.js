@@ -18,6 +18,12 @@ const purgeParents = pointer => {
   }
 }
 
+const eventHookWrapper = handlersPointer => {
+  if (handlersPointer[callbacksSym]) {
+    for (let callback of handlersPointer[callbacksSym]) callback();
+  }
+}
+
 // pathArr is array, path is string
 
 class HandlersManager {
@@ -63,18 +69,18 @@ class HandlersManager {
     // json walk and purge every path of handler???
     jsonWalk(this[handlersSym], null, (val, currentPath) => {
       // Clear all appropriate handlers from path
-      for (let key of currentPath) {
-        const handlersTreePoint = val[callbacksSym];
-        if (handlersTreePoint) {
-          const callbackindex = handlersTreePoint.findIndex(callback => callback === handler);
-          if (callbackindex !== -1) {
-            handlersTreePoint.splice(callbackindex, 1);
-            if (handlersTreePoint.length === 0) delete val[callbacksSym];
-          }
+      const handlersTreePoint = val[callbacksSym];
+      if (handlersTreePoint) {
+        const callbackindex = handlersTreePoint.findIndex(callback => callback === handler);
+        if (callbackindex !== -1) {
+          handlersTreePoint.splice(callbackindex, 1);
+          if (handlersTreePoint.length === 0) delete val[callbacksSym];
         }
       }
       
-      if (Object.keys(val).length !== 0) return
+      // If it has child return
+      if (Object.keys(val).length !== 0) return;
+      // else if it's last child purge parents
       purgeParents(val);
     })
   }
@@ -83,8 +89,9 @@ class HandlersManager {
     // Iterate changes tracker instance and
     // call appropriate handlers at matching paths
     // or something like that
-    console.log("todo");
-    // jsonParallelWalk(changesTrackerInstance, this[handlersSym])
+    jsonParallelWalk(changesTrackerInstance, this[handlersSym],
+      eventHookWrapper, eventHookWrapper
+    );
   }
 
 }
