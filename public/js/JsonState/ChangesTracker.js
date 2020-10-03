@@ -1,7 +1,6 @@
 'use strict';
 
 import HM from "./HandlersManager.js";
-import DUPC from "./DynamicallyUpdatedPromiseChain.js";
 import { mergeLinearChanges as markLinearChanges } from "./utils.js";
 
 const changeMerge = (target, source) => {
@@ -43,12 +42,12 @@ const dispatch = self => {
 
 
 const handlersTree = Symbol("handlersTree");
-const callbackQueue = Symbol("callbackQueue");
+// const callbackQueue = Symbol("callbackQueue");
 const dispatchSym = Symbol("dispatchSym");
 class ChangesTracker {
   constructor(ht) {
     this.changesTree = {};
-    this[callbackQueue] = new DUPC();
+    // this[callbackQueue] = new DUPC();
     if (ht !== undefined) this.addHandlersTree(ht);
     this[dispatchSym] = () => dispatch(this);
   }
@@ -61,12 +60,21 @@ class ChangesTracker {
     if (this[handlersTree]) {
       if (!this.dispatched) {
         // Task
-        // executes at next cycle
-        // setTimeout(dispatch, 0, this); // or maybe requestAnimationFrame is better
+        // runs at next cycle
+        // One task gets executed each cycle
+        // setTimeout(this[dispatchSym]);
+
+        // Animation callback
+        // runs before next render
+        // Every stacked animation callback gets executed before next render
+        // If more animation callbacks are stacked during that time, they get
+        // executed next render. Avoids infinite loops.
+        requestAnimationFrame(this[dispatchSym]);
+
         // Microtask
-        // executes after current call stack is done.
-        // I think it can get stack in infineite loop
-        this[callbackQueue].add(this[dispatchSym]);
+        // runs after current call stack is done.
+        // Dangerous to get stuck in infinite loop
+        // this[callbackQueue].add(this[dispatchSym]);
       }
       this.dispatched = true;
     }

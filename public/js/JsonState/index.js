@@ -147,37 +147,20 @@ class JsonState extends JsonStateNode {
     this[targetSym][listenersSym] = new HandlersManager(); // {[pathString]: [list of handlers]};
     this[targetSym][changesSym] = new ChangesTracker(this[targetSym][listenersSym]); // {tree of changed keys}; empties itself after firing events
 
-    this.hmDebug = () => {
-      const hm = this[targetSym][listenersSym];
+    // this.hmDebug = () => {
+    //   const hm = this[targetSym][listenersSym];
 
-      // const h1 = () => console.log("h1");
+    //   // const h1 = () => console.log("h1");
 
-      hm.add("a", () => console.log("a"));
+    //   hm.add("a", () => {console.warn("fucks")});
 
-      hm.add("b", () => console.log("b"));
+    //   hm.add("b", () => console.log("b"));
 
-      hm.add("f.g.0", () => console.log("wat"));
+    //   hm.add("f.g.0", () => console.log("wat"));
 
-      console.log("hm is", hm);
-    }
+    //   console.log("hm is", hm);
+    // }
   }
 }
-
-// setTimeout(() => {
-//   console.log("Im first")
-//   setTimeout(() => console.log("Where am I?"))
-// })
-
-// console.log("Im second")
-
-// setTimeout(() => console.log("Im third"))
-
-// setTimeout(() => {
-// console.log("Im slo...")
-// for (let i = 0; i < 1000000000; i++) {}
-// console.log("...oooow")
-// })
-
-// setTimeout(() => console.log("Im last. Or am I?"), 11)
 
 export default JsonState;

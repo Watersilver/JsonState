@@ -25,4 +25,3 @@ setTimeout(() => erty.a = "idiot", 1000);
 
 console.log("obj is:", erty)
 
-erty.hmDebug();

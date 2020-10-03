@@ -59,7 +59,6 @@ export const jsonWalk = (json, valHook, diveHook) => {
 
 // Iterate json's and obj's common keys. obj doesn't need to be json
 const jsonParallelWalkPrivate = (json, obj, valHook, diveHook, pathArr = []) => {
-  console.log(Object.entries(json), Object.entries(obj))
   for (let [key, jsonVal] of Object.entries(json)) {
     const currentPath = pathArr.concat(key);
     if (!(key in obj)) continue;
