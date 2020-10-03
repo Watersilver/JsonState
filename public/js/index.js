@@ -23,5 +23,8 @@ setTimeout(() => erty.a = "idiot", 1000);
 
 // const erty = new JsonState(JSON.stringify([]));
 
-console.log("obj is:", erty)
+console.log("obj is:", erty);
 
+const cancel = erty.b.addCallBackToPath("c", () => console.log("ok"));
+cancel();
+erty.b = "that";

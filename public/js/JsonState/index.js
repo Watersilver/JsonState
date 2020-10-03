@@ -54,10 +54,19 @@ const childrenPaths = (jsonState) => {
   return paths;
 }
 
-const emittChangeEvent = (target, key) => {
+const getRootAndPath = target => {
   const arrToRoot = pathToRoot(target);
   const root = arrToRoot.pop();
-  const pathUpToMe = arrToRoot.reverse().concat(key);
+  const pathArr = arrToRoot.reverse();
+  return { root, pathArr };
+}
+
+const emittChangeEvent = (target, key) => {
+  // const arrToRoot = pathToRoot(target);
+  // const root = arrToRoot.pop();
+  // const pathUpToMe = arrToRoot.reverse().concat(key);
+  const { root, pathArr } = getRootAndPath(target);
+  const pathUpToMe = pathArr.concat(key);
   const pathsAfterMe = childrenPaths(target[key]);
   root[changesSym].mergeChanges(pathUpToMe, pathsAfterMe);
 }
@@ -118,7 +127,7 @@ class JsonStateNode {
 
     // Methods
     Object.defineProperty(target, "extend", {
-      value: (str) => {
+      value: str => {
 
         // Parse state extension
         const stateExtension = JSON.parse(str) || {};
@@ -128,6 +137,33 @@ class JsonStateNode {
 
         // Finally extend target with the new state extension
         extend(target, stateExtension);
+      }
+    });
+
+    Object.defineProperty(target, "addCallBackToPath", {
+      value: (path, callback) => {
+        const { root, pathArr } = getRootAndPath(target);
+        const hm = root[targetSym][listenersSym];
+        const wholePath = `${pathArr.join(".")}.${path}`;
+        hm.add(wholePath, callback);
+
+        return () => hm.remove(wholePath, callback);
+      }
+    });
+
+    Object.defineProperty(target, "removeCallBackFromPath", {
+      value: (path, callback) => {
+        const { root, pathArr } = getRootAndPath(target);
+        const hm = root[targetSym][listenersSym];
+        hm.remove(`${pathArr.join(".")}.${path}`, callback);
+      }
+    });
+
+    Object.defineProperty(target, "cleanPath", {
+      value: path => {
+        const { root, pathArr } = getRootAndPath(target);
+        const hm = root[targetSym][listenersSym];
+        hm.cleanPath(`${pathArr.join(".")}.${path}`);
       }
     });
 
@@ -147,19 +183,10 @@ class JsonState extends JsonStateNode {
     this[targetSym][listenersSym] = new HandlersManager(); // {[pathString]: [list of handlers]};
     this[targetSym][changesSym] = new ChangesTracker(this[targetSym][listenersSym]); // {tree of changed keys}; empties itself after firing events
 
-    // this.hmDebug = () => {
-    //   const hm = this[targetSym][listenersSym];
-
-    //   // const h1 = () => console.log("h1");
-
-    //   hm.add("a", () => {console.warn("fucks")});
-
-    //   hm.add("b", () => console.log("b"));
-
-    //   hm.add("f.g.0", () => console.log("wat"));
-
-    //   console.log("hm is", hm);
-    // }
+    // Methods
+    Object.defineProperty(this[targetSym], "removeCallback", {
+      value: callback => this[targetSym][listenersSym].removeHandler(callback)
+    });
   }
 }
 
