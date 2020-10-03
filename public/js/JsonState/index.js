@@ -62,9 +62,6 @@ const getRootAndPath = target => {
 }
 
 const emittChangeEvent = (target, key) => {
-  // const arrToRoot = pathToRoot(target);
-  // const root = arrToRoot.pop();
-  // const pathUpToMe = arrToRoot.reverse().concat(key);
   const { root, pathArr } = getRootAndPath(target);
   const pathUpToMe = pathArr.concat(key);
   const pathsAfterMe = childrenPaths(target[key]);
@@ -140,22 +137,24 @@ class JsonStateNode {
       }
     });
 
-    Object.defineProperty(target, "addCallBackToPath", {
+    Object.defineProperty(target, "addCallbackToPath", {
       value: (path, callback) => {
+        // console.log(getRootAndPath(target));
         const { root, pathArr } = getRootAndPath(target);
         const hm = root[targetSym][listenersSym];
-        const wholePath = `${pathArr.join(".")}.${path}`;
+        const wholePath = pathArr.length > 0 ? `${pathArr.join(".")}.${path}` : path;
         hm.add(wholePath, callback);
 
         return () => hm.remove(wholePath, callback);
       }
     });
 
-    Object.defineProperty(target, "removeCallBackFromPath", {
+    Object.defineProperty(target, "removeCallbackFromPath", {
       value: (path, callback) => {
         const { root, pathArr } = getRootAndPath(target);
         const hm = root[targetSym][listenersSym];
-        hm.remove(`${pathArr.join(".")}.${path}`, callback);
+        const wholePath = pathArr.length > 0 ? `${pathArr.join(".")}.${path}` : path;
+        hm.remove(wholePath, callback);
       }
     });
 
@@ -184,7 +183,7 @@ class JsonState extends JsonStateNode {
     this[targetSym][changesSym] = new ChangesTracker(this[targetSym][listenersSym]); // {tree of changed keys}; empties itself after firing events
 
     // Methods
-    Object.defineProperty(this[targetSym], "removeCallback", {
+    Object.defineProperty(this[targetSym], "purgeCallback", {
       value: callback => this[targetSym][listenersSym].removeHandler(callback)
     });
   }
