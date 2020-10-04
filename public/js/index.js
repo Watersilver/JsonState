@@ -1,4 +1,5 @@
 import JsonState from "./JsonState/index.js";
+import JWR from "./JsonWriteRead/index.js";
 
 // initialize state
 window.erty = new JsonState(JSON.stringify({
@@ -6,6 +7,9 @@ window.erty = new JsonState(JSON.stringify({
   height: 8,
   pos: {x: 0, y: 0}
 }));
+
+const jwr = new JWR(erty, {method: "encryptedToUrl"});
+jwr.read();
 
 const moveCreator = coord => sign => {
   const p = erty.pos;
@@ -65,9 +69,10 @@ const gotToPos = () => {
   player.style.transform = `translate(${newX}px, ${newY}px)`;
 }
 gotToPos();
-window.addEventListener("resize", gotToPos)
+window.addEventListener("resize", gotToPos);
 
 erty.addCallbackToPath("pos", gotToPos);
+erty.addCallbackToPath("pos", () => jwr.write());
 
 // control
 document.addEventListener("keydown", e => {
