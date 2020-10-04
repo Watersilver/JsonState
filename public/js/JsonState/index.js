@@ -174,6 +174,24 @@ class JsonStateNode {
   }
 }
 
+const proxyToJson = (proxy, json = {}) => {
+  const state = proxy[targetSym] ? proxy[targetSym] : proxy;
+  for (let [key, val] of Object.entries(state)) {
+    if (typeof val !== "object") {
+      json[key] = val;
+    } else {
+      if (Array.isArray(val) || (val[targetSym] && Array.isArray(val[targetSym]))) {
+        json[key] = [];
+      } else {
+        json[key] = {};
+      }
+      proxyToJson(val, json[key]);
+    }
+  }
+
+  return json;
+}
+
 class JsonState extends JsonStateNode {
   constructor(initStateStrg) {
     super(initStateStrg);
@@ -186,6 +204,13 @@ class JsonState extends JsonStateNode {
     Object.defineProperty(this[targetSym], "purgeCallback", {
       value: callback => this[targetSym][listenersSym].removeHandler(callback)
     });
+
+    Object.defineProperty(this[targetSym], "stringify", {
+      value: () => {
+        const json = proxyToJson(this);
+        return JSON.stringify(json);
+      }
+    })
   }
 }
 
