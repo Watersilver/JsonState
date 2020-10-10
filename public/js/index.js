@@ -72,7 +72,10 @@ gotToPos();
 window.addEventListener("resize", gotToPos);
 
 erty.addCallbackToPath("pos", gotToPos);
-erty.addCallbackToPath("pos", () => jwr.write());
+erty.onEveryChange(() => jwr.write());
+const log = () => console.log("Hahaha");
+erty.onEveryChange(log);
+erty.offEveryChange(log);
 
 // control
 document.addEventListener("keydown", e => {

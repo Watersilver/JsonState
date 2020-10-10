@@ -35,6 +35,14 @@ class HandlersManager {
   }
 
   add(path, handler) {
+    // Handle tree root
+    if (typeof path === 'function') {
+      handler = path;
+      if (!this[handlersSym][callbacksSym]) this[handlersSym][callbacksSym] = [];
+      this[handlersSym][callbacksSym].push(handler);
+      return;
+    }
+
     const pathArr = path.length > 0 ? path.split(".") : [];
     const [pointer, key] = mergeLinearChanges(this[handlersSym], pathArr, true);
     if (!pointer[key]) pointer[key] = {[parentSym]: pointer, [keySym]: key};
@@ -43,6 +51,20 @@ class HandlersManager {
   }
 
   remove(path, handler) {
+    // Handle tree root
+    if (typeof path === 'function') {
+      handler = path;
+      const pointer = this[handlersSym];
+      if (!pointer[callbacksSym]) return;
+      const callbackindex = pointer[callbacksSym].findIndex(val => val === handler);
+      if (callbackindex !== -1) {
+        // Remove callback
+        pointer[callbacksSym].splice(callbackindex, 1);
+        if (pointer[callbacksSym].length === 0) delete pointer[callbacksSym];
+      }
+      return;
+    }
+
     const pathinfo = pathToVal(this[handlersSym], path);
     if (pathinfo.exists && pathinfo.value[callbacksSym]) {
       const pointer = pathinfo.value;
@@ -58,6 +80,12 @@ class HandlersManager {
   }
 
   cleanPath(path) {
+    // Handle tree root
+    if (path === undefined || path === null) {
+      if (this[handlersSym][callbacksSym]) delete this[handlersSym][callbacksSym];
+      return;
+    }
+
     const pathinfo = pathToVal(this[handlersSym], path);
     if (pathinfo.exists && pathinfo.value[callbacksSym]) {
       delete pathinfo.value[callbacksSym];
@@ -83,6 +111,9 @@ class HandlersManager {
       // else if it's last child purge parents
       purgeParents(val);
     })
+
+    // Handle tree root
+    this.remove(handler);
   }
 
   actOnChanges(changesTrackerInstance) {
@@ -92,6 +123,7 @@ class HandlersManager {
     jsonParallelWalk(changesTrackerInstance, this[handlersSym],
       eventHookWrapper, eventHookWrapper
     );
+    eventHookWrapper(this[handlersSym])
   }
 
 }

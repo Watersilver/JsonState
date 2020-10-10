@@ -201,6 +201,18 @@ class JsonState extends JsonStateNode {
     this[targetSym][changesSym] = new ChangesTracker(this[targetSym][listenersSym]); // {tree of changed keys}; empties itself after firing events
 
     // Methods
+    Object.defineProperty(this[targetSym], "onEveryChange", {
+      value: callback => this[targetSym][listenersSym].add(callback)
+    });
+    Object.defineProperty(this[targetSym], "offEveryChange", {
+      value: callback => this[targetSym][listenersSym].remove(callback)
+    });
+    Object.defineProperty(this[targetSym], "cleanEveryChangeCallbacks", {
+      value: () => {
+        this[targetSym][listenersSym].cleanPath();
+      }
+    });
+
     Object.defineProperty(this[targetSym], "purgeCallback", {
       value: callback => this[targetSym][listenersSym].removeHandler(callback)
     });
